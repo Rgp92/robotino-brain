@@ -2,7 +2,7 @@
 
 #include "headers/Axon.h"
 #include "headers/Brain.h"
-
+#include "../geometry/Angle.h"
 #include <stdlib.h>
 #include <stdexcept>
 #include <string>
@@ -54,31 +54,53 @@ _LaserRangeFinder::readingsToString()
 		<< "  max = " << latestReadings.range_max
 		<< std::cerr;
 
-	const float *rangev;		// Holder for rangevector
-	unsigned int rangec = 0;	// Holder for rangecount
+	const float *rangev; //Holder for rangevector
+	unsigned int rangec = 0; // holder for rangecount
 
-	this->latestReadings.ranges( &rangev, &rangec );
-
-	for ( unsigned int i = 0; i < rangec; i++ )
+	this->latestReadings.ranges(&rangev, &rangec);
+	
+	for( unsigned int i = 0; i < rangec; i++ )
 	{
-		if ( i % 5 == 0 )
+		if(i % 5 == 0)
 		{
-			if ( i % 50 == 0 )
+			if(i%50 == 0)
 			{
-				std::cerr << std::endl;
+				std::cerr<<std::endl;	
 			}
-
-			std::cerr << std::setw(5) << std::setprecision( 2 ) << rangev[ i ] << "   ";
+			std::cerr << std::setw(5) << std::setprecision(2) << rangev[i] <<" "; 
 		}
 	}
 	std::cerr << std::endl;
+	
 }
 
+rec::robotino::api2::LaserRangeFinderReadings
+_LaserRangeFinder::getReadings()
+{
+	return this->latestReadings; 
+}
+
+ 
+float 
+_LaserRangeFinder::getDistance(Angle angle)
+{
+
+	
+	float maxAngle = this->latestReadings.angle_max;
+	float minAngle = this->latestReadings.angle_min;
+	
+	float angleDiff = maxAngle - minAngle;  
+
+	return angleDiff;
+	//(coordinate target)
+	// float dx = (target.x() - this ->_x )
+	
+
+}
 // Private functions
 
 void
-_LaserRangeFinder::scanEvent(
-		const rec::robotino::api2::LaserRangeFinderReadings & scan )
+_LaserRangeFinder::scanEvent(const rec::robotino::api2::LaserRangeFinderReadings & scan )
 {
 	/// @todo Not yet fully implemented, see header file for intended functions
 	this->latestReadings = scan;

@@ -252,6 +252,11 @@ class Control
 				std::cerr << "Ending program" << std::endl;
 				break;
 			}
+			else if ( command == "avoidance" )
+			{
+				
+				this->avoidance();
+			}
 			else
 			{
 				std::cerr << "I am sorry, I am not familiar with the command \"" << command << "\"."
@@ -728,6 +733,7 @@ class Control
 			Vector kinectVector = kinectCoordinate0Adjusted.getVector( kinectCoordinate1 );
 			kinectAngleDiff -= fabs( kinectVector.phi() );
 
+
 			kinectAngleDiff = fabs( kinectAngleDiff );
 
 			phi = Angle( kinectVector.phi() + odomPos1.phi() );
@@ -788,4 +794,57 @@ class Control
 			position = this->pBrain->odom()->getPosition();
 		}
 	}
-};
+
+	void avoidance( )
+	{	
+
+		const float *rangev;  // rangevector
+		unsigned int rangec;  // rangecount
+		unsigned int i = 0;
+		rec::robotino::api2::LaserRangeFinderReadings  r;
+
+	
+		this->pBrain->drive()->setVelocity( 0.0, 0.0, 0.0 );
+
+		
+		while(true)
+			 { 	
+				r = this->pBrain ->lrf()->getReadings();
+				r.ranges( &rangev, &rangec );
+	 		if(i > 7 && i < 21 )
+			{
+				if( rangev[i]  <= 0.35 && rangev[i] >= 0.25 )	// Avstand til vegg er innenfor rekkevidde. Kjør rett frem 				
+				{	std::cerr <<"Fram: "<<rangev[i]<<std::endl;
+					this->pBrain->drive()->setVelocity( 2.0,0.0, 0.0);
+					usleep(100000);
+				}
+				if( rangev[i] < 0.25 ){				// Avstand til vegg er større enn 0.3. Kjør til venstre
+					std::cerr << "venstre:  " <<rangev[i]<<std::endl;
+					this->pBrain->drive()->setVelocity( 0.0,2.0,0.0 );
+					usleep(10000);
+				}
+				if( rangev[i] > 0.35 ){				// Avstand til vegg er større enn 0.3. Kjør til høyre
+					std::cerr << "høyre:  " <<rangev[i]<<std::endl;
+					this->pBrain->drive()->setVelocity( 0.0,-2.0,0.0 );
+					usleep(10000);
+				}
+			}
+		/*	if( i > 49 && i < 63 )
+			{
+				if(rangev[i] < 0.6 )			     // Avstand til vegg foran.
+				{
+					std::cerr <<"snu "<<rangev[i]<<std::endl;
+					this->pBrain->drive()->setVelocity( 0.0,0.0, -1.57);
+					usleep(10000);
+
+				}
+			} */		
+				i++;
+				if (i >=rangec)i=0;			
+			}
+			
+			
+			
+	}
+		
+};	

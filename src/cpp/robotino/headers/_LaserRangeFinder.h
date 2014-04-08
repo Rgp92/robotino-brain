@@ -6,6 +6,7 @@
 #define _LASERRANGEFINDER_H
 
 #include "Axon.h"
+#include "../../geometry/Angle.h"
 
 #include <rec/robotino/api2/LaserRangeFinder.h>
 #include <rec/robotino/api2/LaserRangeFinderReadings.h>
@@ -46,6 +47,13 @@ class _LaserRangeFinder :
 	 * @todo Ideally, this should return the string instead
 	 */
 	void readingsToString();
+
+	rec::robotino::api2::LaserRangeFinderReadings
+		
+		 getReadings();
+	
+	float 
+	getDistance(Angle angle);
 
  private:
 	rec::robotino::api2::LaserRangeFinderReadings
