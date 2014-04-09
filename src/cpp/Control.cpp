@@ -815,17 +815,17 @@ class Control
 			{
 				if( rangev[i]  <= 0.35 && rangev[i] >= 0.25 )	// Avstand til vegg er innenfor rekkevidde. Kjør rett frem 				
 				{	std::cerr <<"Fram: "<<rangev[i]<<std::endl;
-					this->pBrain->drive()->setVelocity( 2.0,0.0, 0.0);
+					this->pBrain->drive()->setVelocity( 0.3 , 0.0 , 0.0);
 					usleep(100000);
 				}
 				if( rangev[i] < 0.25 ){				// Avstand til vegg er større enn 0.3. Kjør til venstre
 					std::cerr << "venstre:  " <<rangev[i]<<std::endl;
-					this->pBrain->drive()->setVelocity( 0.0,2.0,0.0 );
+					this->pBrain->drive()->setVelocity( 0.0 , 0.3 , 0.0 );
 					usleep(10000);
 				}
 				if( rangev[i] > 0.35 ){				// Avstand til vegg er større enn 0.3. Kjør til høyre
 					std::cerr << "høyre:  " <<rangev[i]<<std::endl;
-					this->pBrain->drive()->setVelocity( 0.0,-2.0,0.0 );
+					this->pBrain->drive()->setVelocity( 0.0,-0.3,0.0 );
 					usleep(10000);
 				}
 			}
