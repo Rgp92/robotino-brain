@@ -1,0 +1,8 @@
+Brain logEvent():	1: State changed to 1
+Brain logEvent():	1: State changed to 2
+Brain logEvent():	1: State changed to 3
+Brain logEvent():	1: Disconnected
+Brain logEvent():	1: State changed to 6
+Brain logEvent():	1: State changed to 0
+Brain logEvent():	1: Disconnected
+Error during brain initialization

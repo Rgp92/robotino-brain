@@ -252,10 +252,17 @@ class Control
 				std::cerr << "Ending program" << std::endl;
 				break;
 			}
-			else if ( command == "avoidance" )
+			else if ( command == "laserrange")
+			{
+				if ( this->pBrain->lrf() )
+				{
+					this->pBrain->lrf()->SetLaserRange();
+				}
+			}
+			else if ( command == "wallfollow" )
 			{
 				
-				this->avoidance();
+				this->wallfollow();
 			}
 			else
 			{
@@ -795,56 +802,191 @@ class Control
 		}
 	}
 
-	void avoidance( )
+	void wallfollow()
 	{	
 
 		const float *rangev;  // rangevector
 		unsigned int rangec;  // rangecount
 		unsigned int i = 0;
+		float front = 0;
+		float right = 0;
+		//float angleMax = 0;
 		rec::robotino::api2::LaserRangeFinderReadings  r;
 
-	
+		this->pBrain->odom()->set( 0.0, 0.0, 0.0);
 		this->pBrain->drive()->setVelocity( 0.0, 0.0, 0.0 );
+		
+
 
 		
 		while(true)
 			 { 	
+			
 				r = this->pBrain ->lrf()->getReadings();
 				r.ranges( &rangev, &rangec );
-	 		if(i > 7 && i < 21 )
-			{
-				if( rangev[i]  <= 0.35 && rangev[i] >= 0.25 )	// Avstand til vegg er innenfor rekkevidde. Kjør rett frem 				
-				{	std::cerr <<"Fram: "<<rangev[i]<<std::endl;
-					this->pBrain->drive()->setVelocity( 0.3 , 0.0 , 0.0);
-					usleep(100000);
-				}
-				if( rangev[i] < 0.25 ){				// Avstand til vegg er større enn 0.3. Kjør til venstre
-					std::cerr << "venstre:  " <<rangev[i]<<std::endl;
-					this->pBrain->drive()->setVelocity( 0.0 , 0.3 , 0.0 );
-					usleep(10000);
-				}
-				if( rangev[i] > 0.35 ){				// Avstand til vegg er større enn 0.3. Kjør til høyre
-					std::cerr << "høyre:  " <<rangev[i]<<std::endl;
-					this->pBrain->drive()->setVelocity( 0.0,-0.3,0.0 );
-					usleep(10000);
-				}
-			}
-		/*	if( i > 49 && i < 63 )
-			{
-				if(rangev[i] < 0.6 )			     // Avstand til vegg foran.
-				{
-					std::cerr <<"snu "<<rangev[i]<<std::endl;
-					this->pBrain->drive()->setVelocity( 0.0,0.0, -1.57);
-					usleep(10000);
+				//angleMax = r.angle_max;
 
-				}
-			} */		
+			//	obstacle(rangev, rangec,angleMax);
+			//	usleep(10000);
+
+				i = 0;
+
+						//	angleMin = r.angle_min;
+				// 			angleMax = r.angle_max;
+			
+
+			 
+
+				front = avoidFront(rangev);
+				right = avoidRight(rangev);
+
+				do
+				{
+					std::cerr<<"front "<<i<<":"<<std::endl;		
+					if((i > 0 && i < 84) && (front > 0.6) )
+					{
+						if(right <= 0.30 && right >= 0.28 )	// Avstand til vegg er innenfor rekkevidde. Kjør rett frem 	
+						{	
+							std::cerr <<"Fram: "<<rangev[i]<<std::endl;
+							this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.0);
+							
+						}
+						if ( right < 0.27 )
+						{				// Avstand til vegg er større enn 0.3. Kjør til venstre
+							std::cerr << "venstre:  " <<rangev[i]<<std::endl;
+							this->pBrain->drive()->setVelocity( 0.0 , 0.1 , 0.0 );
+							
+						}
+						if( right > 0.32 )
+						{				// Avstand til vegg er større enn 0.3. Kjør til høyre
+							std::cerr << "høyre:  " <<rangev[i]<<std::endl;
+							this->pBrain->drive()->setVelocity( 0.0 , -0.1 , 0.0 );
+							
+						}
+					}
+
+					if ( (i > 0 && i < 84) && front < 0.6 )
+					{	
+						std::cerr<<"Det er noe i veien. Avstand er, så snu med 45 grader: "<<front<<std::endl;
+						this->pBrain->drive()->setVelocity( 0.0 , 0.2 , 1.57 );
+						
+					}
+					
 				i++;
-				if (i >=rangec)i=0;			
-			}
-			
-			
-			
-	}
+				usleep(1000);
+				} while( i <= 85 );	
 		
+				/*	if( i > 300 && i < 350  )
+					{
+						if(rangev[i] < 0.6 )			     // Avstand til vegg foran.
+						{
+							std::cerr <<"snu "<<rangev[i]<<std::endl;
+							this->pBrain->drive()->setVelocity( 0.0,0.0, -1.57);
+							usleep(100000);
+	
+						}
+					} 	
+		
+						
+			  //	usleep(20000); 
+		while(j < rangec){
+					if(j > 237 && j < 277){
+						
+						if(rangev[i] < 0.6 )
+						{
+							std::cerr<<"snu "<< rangev[i] << std::endl;
+							this->pBrain->drive()->setVelocity(0.0, 0.0, -1.57);
+							usleep(20000);
+						}
+					} j++;
+
+				}	*/
+		if (i >=85)i=0;
+		usleep(10000);	
+		}
+	}
+
+/*	void obstacle(const float *rangev, unsigned int rangec, float angleMax)
+	{
+
+		float x = 0, d0, d1, psi, phi, vinkelc, angleToC, R, front;
+		int Ipsi = 0;
+  		vinkelc =(30.0/180.0) * 3.141592; // convertere til radianer
+		psi = angleMax - vinkelc;
+		Ipsi = psi;
+		angleToC =  psi / 0.36;
+		front = avoidFront(rangev);
+		d0 =rangev[0];
+		d1 = rangev[Ipsi]; // 30 grader i count format 
+		x = d1*cos(psi);
+		phi = atan(d1 * sin(psi) / x);
+		R =0.1* ( 1 - abs(phi) / 1.570796 )* 0.2 +  (1 - d0/0.5)*0.3;
+		std::cerr<<"vinkelc: " << vinkelc<<std::endl;
+		std::cerr<<"R: " << R<< "X: "<<x<< "phi: "<<phi<<std::endl;
+		
+		if(rangec > 0)
+		{   
+			if(front > 0.6)
+			{
+				
+				if(x  > d0 )
+				{
+					std::cerr << "venstre:  " <<x << "d1   "<< d1 <<std::endl;
+					this->pBrain->drive()->setVelocity(0.0 , 0.1 , R);
+		
+				}	
+				if( x < d0)
+				{
+					std::cerr << "høyre:  "<<x <<"d1  " << d1 <<std::endl;
+					this->pBrain->drive()->setVelocity(0.0, -0.1, R );
+				}
+			
+				else
+				{
+					std::cerr <<"Fram: "<<x << "d1  " << d1<<std::endl;
+					this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0 );
+				}
+			}
+			if(front < 0.6)
+				{
+					std::cerr<<"Det er noe i veien. Avstand er, så snu med 45 grader: "<<front<<std::endl;
+					this->pBrain->drive()->setVelocity( 0.15 , 0.15 , 1.57 );
+	
+				}	
+		}
+	
+				
+	}*/ 
+
+	float avoidFront(const float *rangev) 
+	{
+		float temp = 0.0;	
+		float min_front_distance = 5.6;
+	
+			
+		for(unsigned int i = 222; i < 278; i++)
+		{
+			temp = rangev[i];
+			if(temp < min_front_distance) min_front_distance = temp;
+		}
+		
+		usleep(1000);
+		return min_front_distance;
+	}	
+	
+	float avoidRight(const float *rangev)
+	{
+		float temp = 0;
+		float min_right_distance = 5.6;
+		
+		for(unsigned i = 0; i < 84; i++)
+		{
+			temp = rangev[i];
+			if(temp < min_right_distance) min_right_distance = temp;
+		}
+	
+		usleep(1000);
+		return min_right_distance;
+	}
+
 };	

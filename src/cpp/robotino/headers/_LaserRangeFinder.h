@@ -41,6 +41,12 @@ class _LaserRangeFinder :
 	 */
 	bool test();
 	
+	void SetLaserRange();	// Edit min and max reading angle
+	
+	rec::robotino::api2::LaserRangeFinderReadings	
+	
+		setNewAngle();
+
 	/**
 	 * Prints the latest readings
 	 *
@@ -54,6 +60,9 @@ class _LaserRangeFinder :
 	
 	float 
 	getDistance(Angle angle);
+	
+	
+	bool checkFront();
 
  private:
 	rec::robotino::api2::LaserRangeFinderReadings

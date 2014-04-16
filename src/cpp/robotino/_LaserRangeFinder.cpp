@@ -41,6 +41,21 @@ _LaserRangeFinder::test()
 }
 
 void
+_LaserRangeFinder::SetLaserRange()
+{
+	const float range = 666.0;
+	const int rangeSize = 240;
+
+	latestReadings.setRanges(&range,rangeSize); 
+}
+
+rec::robotino::api2::LaserRangeFinderReadings
+_LaserRangeFinder::setNewAngle()
+{
+	return this->latestReadings; 
+}
+
+void
 _LaserRangeFinder::readingsToString()
 {
 	std::cerr << "Seq = " << latestReadings.seq
@@ -56,9 +71,9 @@ _LaserRangeFinder::readingsToString()
 
 	const float *rangev; //Holder for rangevector
 	unsigned int rangec = 0; // holder for rangecount
-
-	this->latestReadings.ranges(&rangev, &rangec);
 	
+	this->latestReadings.ranges(&rangev, &rangec);
+	std::cerr<<" "<<rangec<<std::endl;	
 	for( unsigned int i = 0; i < rangec; i++ )
 	{
 		if(i % 5 == 0)
@@ -96,6 +111,29 @@ _LaserRangeFinder::getDistance(Angle angle)
 	// float dx = (target.x() - this ->_x )
 	
 
+}
+
+bool
+_LaserRangeFinder::checkFront()
+{
+	const float *rangev; //Holder for rangevector
+	unsigned int rangec = 0; // holder for rangecount
+	
+
+	this->latestReadings.ranges(&rangev, &rangec);
+	for(unsigned int i = 237; i < 277; i++)
+		{
+			if(rangev[i] < 0.6)
+			{	
+				return false;
+			}
+			else
+			{
+				 return true;
+			}
+		}
+
+return 0;
 }
 // Private functions
 
