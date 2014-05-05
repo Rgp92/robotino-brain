@@ -52,6 +52,14 @@ _Odometry::getPosition()
 	return AngularCoordinate( this->x, this->y, this->phi );
 }
 
+Angle
+_Odometry::getPhi()
+{
+	this->update();
+
+	return Angle( this->phi );
+}
+
 float
 _Odometry::currentAbsSpeed()
 {

@@ -88,6 +88,8 @@ class Brain : public rec::robotino::api2::Com
 	 */
 	_LaserRangeFinder * lrf();
 
+	_DistanceSensors * dist();
+
 	/** Returns if a LaserRangeFinder is present
 	 *
 	 * @return  Presence of LaserRangeFinder

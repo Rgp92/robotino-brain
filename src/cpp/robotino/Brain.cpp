@@ -85,6 +85,12 @@ Brain::lrf()
 	return this->pLRF;
 }
 
+_DistanceSensors *
+Brain::dist()
+{
+	return this->pDistSensors;
+}
+
 bool
 Brain::hasLRF()
 {

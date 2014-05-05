@@ -82,6 +82,7 @@ class _Odometry : public rec::robotino::api2::Odometry, public Axon
 	 * @return	The current position and course as an AngularCoordinate
 	 */
 	AngularCoordinate getPosition();
+	Angle getPhi();
 
 	/**
 	 * Gets the current absolute speed.

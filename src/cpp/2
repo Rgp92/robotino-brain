@@ -115,23 +115,23 @@ _LaserRangeFinder::getDistance(Angle angle)
 
 
 obstacleAvoidance
-_LaserRangeFinder::sensorFront ( const float *rangev)
+_LaserRangeFinder::sensorFront ()
 {
 	
+	const float *rangev; //Holder for rangevector
+	unsigned int rangec = 0; // holder for rangecount
 	obstacleAvoidance Result; 
- 	 	
+ 	latestReadings.ranges(&rangev, &rangec);
+ 	
 	Result.temp = 0;
 	Result.min  = 5.6;
-	Result.average = 0;
-
 		
-		for(unsigned int i = 215; i <= 297; i++)
+		for(unsigned int i = 209; i <= 319; i++)
 		{
 			Result.average = rangev[i] + Result.average;
-			Result.temp = rangev[i];
 			if( Result.temp < Result.min ) Result.min = Result.temp;
 		}
-		Result.average = Result.average / 83.0;
+		
 		std::cerr<<"Front: "<<Result.min<<std::endl;
 		return (Result);
 
@@ -140,27 +140,25 @@ _LaserRangeFinder::sensorFront ( const float *rangev)
 }
  
 obstacleAvoidance
-_LaserRangeFinder::sensorRight( const float *rangev)
+_LaserRangeFinder::sensorRight ()
 {
 	
+	const float *rangev; //Holder for rangevector
+	unsigned int rangec = 0; // holder for rangecount
 	obstacleAvoidance Result;
-		
+	latestReadings.ranges(&rangev, &rangec);
+	
 
  	
 	Result.temp = 0;
 	Result.min  = 5.6;
-	Result.average = 0;
-
 		
-		for(unsigned int i = 0; i <= 214; i++)
+		for(unsigned int i = 0; i <= 208; i++)
 		{
 			Result.average = rangev[i] + Result.average;
-			Result.temp = rangev[i];
 			if( Result.temp < Result.min ) Result.min = Result.temp;
 		}
 		
-
-		Result.average = Result.average / 214.0;
 		std::cerr<<"Right: "<<Result.min<<std::endl;
 		return Result;
 
@@ -168,24 +166,25 @@ _LaserRangeFinder::sensorRight( const float *rangev)
 }
 
 obstacleAvoidance
-_LaserRangeFinder::sensorLeft(const float *rangev )
+_LaserRangeFinder::sensorLeft()
 {
 	
+	const float *rangev; //Holder for rangevector
+	unsigned int rangec = 0; // holder for rangecount
 	obstacleAvoidance Result;
-	
+	latestReadings.ranges(&rangev, &rangec);
+
 
  	
 	Result.temp = 0;
 	Result.min  = 5.6;
-	Result.average = 0;
 		
-		for(unsigned int i = 298; i <= 512; i++)
+		for(unsigned int i = 320; i <= 513; i++)
 		{
 			Result.average = rangev[i] + Result.average;
-			Result.temp = rangev[i];
 			if( Result.temp < Result.min ) Result.min = Result.temp;
 		}
-		Result.average = Result.average/ 214.0;
+		
 		std::cerr<<"Left: "<<Result.min<<std::endl;
 		return Result;
 

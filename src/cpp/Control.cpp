@@ -3,6 +3,8 @@
 #include "robotino/headers/_Odometry.h"
 #include "robotino/headers/_CompactBha.h"
 #include "robotino/headers/_LaserRangeFinder.h"
+#include "robotino/headers/hinder.h"
+#include "robotino/headers/_DistanceSensors.h"
 
 #include "geometry/All.h"
 
@@ -259,11 +261,42 @@ class Control
 					this->pBrain->lrf()->SetLaserRange();
 				}
 			}
-			else if ( command == "wallfollow" )
+			else if ( command == "wallfollow" )	// Følg veggen
 			{
 				
 				this->wallfollow();
 			}
+			else if ( command == "naviger" )	// Navigation to a coordinate whilst avoiding obstacle 
+			{		
+				this->naviger( 2.0, 0.0 );
+			}
+			else if ( command == "snu" )		// Rett opp roboten til veggen
+			{
+				
+				this->rettopp();
+			}
+			else if ( command == "printfront" )	// Print ut verdier for minsteverdi for sensor frem og til hoyre
+			{
+				
+				this->sensorFront();
+			}
+			else if ( command == "printright" )	// Print ut verdier for minsteverdi for sensor frem og til hoyre
+			{
+				
+				this->sensorRight();
+			}
+			else if( command == "printleft" )
+			{
+				this->sensorLeft();
+			}
+			else if( command == "obstaclep")
+			{
+				this->obstacleP();
+			}		
+		/*	else if ( command == "printo" )	// Print ut verdier for minsteverdi for sensor frem og til hoyre
+			{
+				this->obstacleP();
+			}*/
 			else
 			{
 				std::cerr << "I am sorry, I am not familiar with the command \"" << command << "\"."
@@ -804,163 +837,182 @@ class Control
 
 	void wallfollow()
 	{	
-
 		const float *rangev;  // rangevector
 		unsigned int rangec;  // rangecount
-		unsigned int i = 0;
-		float front = 0;
-		float right = 0;
-		//float angleMax = 0;
+		unsigned int i	= 0;
+		float front	= 0;
+		float right	= 0;
+		bool ok		= true;
+		bool turned	= true;
+		
+		ObstacleClass hinder;
 		rec::robotino::api2::LaserRangeFinderReadings  r;
 
-		this->pBrain->odom()->set( 0.0, 0.0, 0.0);
+		this->pBrain->odom()->set( 0.0, 0.0, 0.0 );
 		this->pBrain->drive()->setVelocity( 0.0, 0.0, 0.0 );
 		
+		rettopp();		// Starter med å rette opp roboten for veggen den er ved.
 
-
-		
-		while(true)
-			 { 	
+		do
+		{ 	
 			
-				r = this->pBrain ->lrf()->getReadings();
-				r.ranges( &rangev, &rangec );
-				//angleMax = r.angle_max;
+			r = this->pBrain ->lrf()->getReadings();
+			r.ranges( &rangev, &rangec );
+			//hinder.List();
+			i = 0;
 
-			//	obstacle(rangev, rangec,angleMax);
-			//	usleep(10000);
+			front = avoidFront(rangev);
+			right = avoidRight(rangev);
 
-				i = 0;
-
-						//	angleMin = r.angle_min;
-				// 			angleMax = r.angle_max;
-			
-
-			 
-
-				front = avoidFront(rangev);
-				right = avoidRight(rangev);
-
-				do
-				{
-					std::cerr<<"front "<<i<<":"<<std::endl;		
-					if((i > 0 && i < 84) && (front > 0.6) )
-					{
-						if(right <= 0.30 && right >= 0.28 )	// Avstand til vegg er innenfor rekkevidde. Kjør rett frem 	
-						{	
-							std::cerr <<"Fram: "<<rangev[i]<<std::endl;
-							this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.0);
-							
-						}
-						if ( right < 0.27 )
-						{				// Avstand til vegg er større enn 0.3. Kjør til venstre
-							std::cerr << "venstre:  " <<rangev[i]<<std::endl;
-							this->pBrain->drive()->setVelocity( 0.0 , 0.1 , 0.0 );
-							
-						}
-						if( right > 0.32 )
-						{				// Avstand til vegg er større enn 0.3. Kjør til høyre
-							std::cerr << "høyre:  " <<rangev[i]<<std::endl;
-							this->pBrain->drive()->setVelocity( 0.0 , -0.1 , 0.0 );
-							
-						}
-					}
-
-					if ( (i > 0 && i < 84) && front < 0.6 )
+			do
+			{
+				//std::cerr<<"front: "<<front<<"\tRight: "<<right<<std::endl;		
+				//if((i > 0 && i < 84) && (front > 0.6) )
+				//if( ( right <= 0.30 && right >= 0.28 ) && ( front > 0.6 ) )
+				//{
+					if( ( right <= 0.30 && right >= 0.28 ) && ( front > 0.6 ) ) 	// Avstand til vegg er innenfor rekkevidde. Kjør rett frem 	
 					{	
-						std::cerr<<"Det er noe i veien. Avstand er, så snu med 45 grader: "<<front<<std::endl;
-						this->pBrain->drive()->setVelocity( 0.0 , 0.2 , 1.57 );
-						
+						if (turned)rettopp();
+						turned = false;
+						this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.0);
+					}
+					if( ( right < 0.26 ) && ( front > 0.6 ) )			// Avstand til vegg er større enn 0.3. Kjør til venstre
+					{				
+						this->pBrain->drive()->setVelocity( 0.0 , 0.1 , 0.0 );
+						turned = false;
+					}
+					if( ( right > 0.32 ) && ( front > 0.6 ) )			// Avstand til vegg er større enn 0.3. Kjør til høyre
+					{
+						this->pBrain->drive()->setVelocity( 0.0 , -0.1 , 0.0 );
+						turned = false;
+					}
+				//}
+				
+					if( ( right <= 0.32 && right >= 0.27 ) && ( front < 0.6 ) )	//Avstand til hinder forran er mindre enn 60 cm
+					{
+						/*turned =*/ turnLeft(); //snu 90grader
+						turned = true;
 					}
 					
 				i++;
 				usleep(1000);
-				} while( i <= 85 );	
+				}while( i < 1 );	
 		
-				/*	if( i > 300 && i < 350  )
-					{
-						if(rangev[i] < 0.6 )			     // Avstand til vegg foran.
-						{
-							std::cerr <<"snu "<<rangev[i]<<std::endl;
-							this->pBrain->drive()->setVelocity( 0.0,0.0, -1.57);
-							usleep(100000);
-	
-						}
-					} 	
-		
-						
-			  //	usleep(20000); 
-		while(j < rangec){
-					if(j > 237 && j < 277){
-						
-						if(rangev[i] < 0.6 )
-						{
-							std::cerr<<"snu "<< rangev[i] << std::endl;
-							this->pBrain->drive()->setVelocity(0.0, 0.0, -1.57);
-							usleep(20000);
-						}
-					} j++;
+			
+		if (i >=1)i=0;
+		usleep(10000);
 
-				}	*/
-		if (i >=85)i=0;
-		usleep(10000);	
-		}
+		}while(ok);
+	}
+		
+	void printphi()
+	{
+		AngularCoordinate position;
+		Angle phi = this->pBrain->odom()->getPhi();
+		std::cerr << "Phi: " <<phi <<std::endl;
+		
+		/*
+		float rotat = 0;
+		
+		if( phi < 1.57 && rotat < 1.57 )
+		{
+			this->pBrain->drive()->setVelocity( 0.0 , 0.0 , 0.1 );
+		 	rotat +=0.1; 	
+
+		}*/	// Dette funker ikke	
+
+
+	}
+	void turnLeft()
+	{
+				//float leftTurn	= 1.57079633;
+		//float leftTurn	= 1.5708;
+		//float newPhi	= leftTurn;
+
+		//this->pBrain->drive()->setVelocity( 0.0 , 0.0 , 0.2);
+		//	this->pBrain->odom()->set( position.x(), position.y(), position.phi() );
+		//	position = this->pBrain->odom()->getPosition();
+		//float position;
+		//std::cerr<<"Pos: "<<position.phi()<<std::endl;
+		//while(i<y){
+			this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.7854 );
+			//this->pBrain->drive()->setVelocity( 0.15 , 0.0 , 1.57 );
+		//i++;
+		
+		//}
+		//if( i >= y)i=0;	
+		usleep(2000000);
+		//return true;
+		rettopp();
 	}
 
-/*	void obstacle(const float *rangev, unsigned int rangec, float angleMax)
+	void rettopp()
 	{
+		const float *rangev;  // rangevector
+		unsigned int rangec;  // rangecount
+		unsigned int i = 0;
+		bool ok = true;
+	 	double d0;
+		double d1;
+		double x;
+		float front = 0;
+		float right = 0;
 
-		float x = 0, d0, d1, psi, phi, vinkelc, angleToC, R, front;
-		int Ipsi = 0;
-  		vinkelc =(30.0/180.0) * 3.141592; // convertere til radianer
-		psi = angleMax - vinkelc;
-		Ipsi = psi;
-		angleToC =  psi / 0.36;
-		front = avoidFront(rangev);
-		d0 =rangev[0];
-		d1 = rangev[Ipsi]; // 30 grader i count format 
-		x = d1*cos(psi);
-		phi = atan(d1 * sin(psi) / x);
-		R =0.1* ( 1 - abs(phi) / 1.570796 )* 0.2 +  (1 - d0/0.5)*0.3;
-		std::cerr<<"vinkelc: " << vinkelc<<std::endl;
-		std::cerr<<"R: " << R<< "X: "<<x<< "phi: "<<phi<<std::endl;
-		
-		if(rangec > 0)
-		{   
-			if(front > 0.6)
+		rec::robotino::api2::LaserRangeFinderReadings  r;
+
+		do
+		{
+			r = this->pBrain ->lrf()->getReadings();
+			r.ranges( &rangev, &rangec );
+			i = 0;
+
+			front = avoidFront(rangev);
+			right = avoidRight(rangev);
+
+			do
 			{
+				// Sensor verdier hentet fra 
+				d0 = floorf(rangev[0]*97)/100;		// Disse to er for vinkelen 
+				d1 = floorf(rangev[100]*97)/100;	// roboten retter seg etter.
+
+				// Beregnet hyp avstand
+				x  = floorf((d0 / cos(0.52))*97)/100;
+
+				if(/* (d0 > 0.02) &&*/ (d1 > x) )
+				{
+					//std::cerr<<"d1: "<< d1 <<"\tx: " << x <<"\tfront: "<< front <<std::endl;
+					this->pBrain->drive()->setVelocity( 0.0 , 0.0 ,-0.4 );
+					ok = true;
+				}
+				if(/* (d0 > 0.02) &&*/ (d1 < x) )
+				{
+					//std::cerr<<"d1: "<< d1 <<"\tx: " << x <<"\tfront: "<< front <<std::endl;
+					this->pBrain->drive()->setVelocity( 0.0 , 0.0 ,0.4 );
+					ok= true;
+				}
 				
-				if(x  > d0 )
-				{
-					std::cerr << "venstre:  " <<x << "d1   "<< d1 <<std::endl;
-					this->pBrain->drive()->setVelocity(0.0 , 0.1 , R);
-		
-				}	
-				if( x < d0)
-				{
-					std::cerr << "høyre:  "<<x <<"d1  " << d1 <<std::endl;
-					this->pBrain->drive()->setVelocity(0.0, -0.1, R );
+				if(/* (d0 > 0.02) &&*/ (d1 == x) )
+				{			
+					this->pBrain->drive()->setVelocity( 0.0 , 0.0 ,0.0 );
+					//std::cerr<<"d1: "<< d1 <<"\tx: " << x <<"\tfront: "<< front <<std::endl;
+					//std::cerr<<"\n\n\n OK! Robot er på linje med veggen. \n\n\n"<<std::endl;
+					ok = false;
 				}
 			
-				else
-				{
-					std::cerr <<"Fram: "<<x << "d1  " << d1<<std::endl;
-					this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0 );
-				}
-			}
-			if(front < 0.6)
-				{
-					std::cerr<<"Det er noe i veien. Avstand er, så snu med 45 grader: "<<front<<std::endl;
-					this->pBrain->drive()->setVelocity( 0.15 , 0.15 , 1.57 );
-	
-				}	
-		}
-	
-				
-	}*/ 
+				i++;
+				usleep(1000);
+			}while(i <= 1 );
+
+			if (i >=1)i=0;
+		}while(ok);
+
+	  	std::cerr<<"rettet opp" <<std::endl;
+		usleep(10000);
+	}
 
 	float avoidFront(const float *rangev) 
 	{
-		float temp = 0.0;	
+		float temp = 0.0;
 		float min_front_distance = 5.6;
 	
 			
@@ -988,5 +1040,260 @@ class Control
 		usleep(1000);
 		return min_right_distance;
 	}
+	
+	float sensorFront()
+	{
+		const float *rangev;  // rangevector
+		unsigned int rangec;  // rangecount
 
-};	
+		rec::robotino::api2::LaserRangeFinderReadings  r;
+	
+		r = this->pBrain ->lrf()->getReadings();
+		r.ranges( &rangev, &rangec );
+	
+		float temp = 0;
+		float min_front_distance = 5.6;
+		
+		for(unsigned i = 215; i <= 297; i++)
+		{
+			temp = rangev[i];
+			if(temp < min_front_distance) min_front_distance = temp;
+		}
+	
+		usleep(1000);
+		
+		std::cerr<<"Front: "<<min_front_distance<<std::endl;
+		return min_front_distance;
+	}
+
+	float sensorRight()
+	{
+		const float *rangev;  // rangevector
+		unsigned int rangec;  // rangecount
+		
+
+		rec::robotino::api2::LaserRangeFinderReadings  r;
+	
+		r = this->pBrain ->lrf()->getReadings();
+		r.ranges( &rangev, &rangec );
+		
+		float temp = 0;
+		float min_right_distance = 5.6;
+		
+		for(unsigned int i = 0; i <= 214; i++)
+		{
+			temp = rangev[i] + temp;
+			if(rangev[i]< min_right_distance) min_right_distance = rangev[i];
+		}
+		
+		std::cerr<<"Right: "<<min_right_distance<<std::endl;
+
+		return temp/214.0;
+	}
+	
+	float sensorLeft()
+	{
+		const float *rangev;  // rangevector
+		unsigned int rangec;  // rangecount
+
+		rec::robotino::api2::LaserRangeFinderReadings  r;
+	
+		r = this->pBrain ->lrf()->getReadings();
+		r.ranges( &rangev, &rangec );
+
+		float temp = 0;
+		float min_left_distance = 5.6;
+		//int point;
+
+		for(unsigned i = 298; i < 513; i++)
+		{
+			temp = rangev[i] + temp;
+			if(rangev[i] < min_left_distance) min_left_distance = rangev[i];
+		}
+
+		std::cerr<<"Left: "<<min_left_distance<<std::endl;
+		return min_left_distance;
+	}
+ 	
+	void obstacleP()
+	{
+		const float *rangev;  // rangevector
+		unsigned int rangec;  // rangecount
+		rec::robotino::api2::LaserRangeFinderReadings  r;
+
+		//float obsarray[514];
+		float temp		= 0;
+		float min_distance	= 5.6;
+		float left		= 0;
+		float right		= 0;
+		//float front 		= 0;
+		//int pointMin;
+		r = this->pBrain ->lrf()->getReadings();
+		r.ranges( &rangev, &rangec );
+
+		
+		for(unsigned int i = 225; i < 288; i++)		// Les av verdier for front sensor.
+		{
+			temp = rangev[i];
+			if(temp < min_distance )min_distance = temp;
+
+		}	
+			//std::cerr << "Er det hindring forran Robotino? "<<min_distance << std::endl;
+
+			if( temp < 1.0 ) // Les av høyre og venstre side. Den med mest verdi gir robotino beskjed om hvor den skal
+			{
+				right	= sensorRight();	// les av høyre side
+				left	= sensorLeft();		// les av venstre side
+
+				
+
+				// Velger å rotere roboten til den siden med hindring som er ikke nærmest
+				if( right > left )
+				{
+					std::cerr << "Go left\n" << std::endl;// roter til venstre
+					this->pBrain->drive()->setVelocity( 0.0 , -0.1 , 0.0 );
+				}
+				else if( right < left )
+				{
+					std::cerr << "Go right\n" << std::endl;// roter til høyre
+					this->pBrain->drive()->setVelocity( 0.0 , 0.1 , 0.0 );
+				}
+				else
+				{
+					this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
+				}
+			}
+	
+			usleep(1000);
+		
+
+	} 
+
+	bool naviger( float goalX, float goalY )
+	{
+		int i = 0;
+		//float right = 0;
+		//float left  = 0;
+		float front = 0;
+		const float *rangev;  // rangevector
+		unsigned int rangec;  // rangecount
+		float sensorN5 = 0;
+		float sensorN4 = 0;
+		AngularCoordinate odomPos1;
+		//Coordinate * destination;
+
+		rec::robotino::api2::LaserRangeFinderReadings  r;
+		obstacleAvoidance right, left;
+	//	usleep( 200000 );
+
+	
+		r = this->pBrain ->lrf()->getReadings();
+		r.ranges( &rangev, &rangec );
+
+		
+
+	//	this->pBrain->drive()->fullStop();
+	//	usleep( 200000 );
+		this->pBrain->odom()->set( 0.0, 0.0, 0.0 );
+		this->pBrain->drive()->setVelocity(0.0, 0.0 , 0.0);
+		this->pBrain->drive()->setDestination( Coordinate( 0.0, 0.0 ) );
+		this->pBrain->drive()->stopPointing();
+	
+
+					
+		
+		
+ 	do
+	{
+		r = this->pBrain ->lrf()->getReadings();
+		r.ranges( &rangev, &rangec );
+
+		front = avoidFront(rangev);
+		right = this->pBrain->lrf()->sensorRight(rangev);
+		left  = this->pBrain->lrf()->sensorLeft(rangev);
+		odomPos1 = this->pBrain->odom()->getPosition();
+		sensorN5 = this->pBrain->dist()->sensorDistance(5);
+		sensorN4 = this->pBrain->dist()->sensorDistance(4);
+		std::cerr<<" "<< sensorN4<<std::endl;
+
+
+		
+		do
+		{
+		//	obstacleP();
+			this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
+			if ( left.min <= 0.4 ) this->pBrain->drive()->setVelocity(0.1, 0.1, 0.0);
+			if ( right.min <= 0.4 ) this->pBrain->drive()->setVelocity(0.1, -0.1, 0.0);
+			
+			if(front <=  1.0  )
+			{
+				
+				this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
+				
+				
+					if( (right.average < left.average) && left.min > 0.30) 
+					{
+						
+						std::cerr << "Go right\n" << std::endl;// roter til right
+						this->pBrain->drive()->setVelocity( 0.1 , 0.1 , 0.0 );
+						odomPos1 = this->pBrain->odom()->getPosition();
+
+
+					}
+					if( (left.average < right.average) && right.min > 0.30 )
+					{
+						std::cerr << "Go left\n" << std::endl;// roter til left
+						this->pBrain->drive()->setVelocity( 0.1 , -0.1 , 0.0 );
+						odomPos1 = this->pBrain->odom()->getPosition();
+
+					}
+					usleep(1000);	
+				
+				
+			}
+
+			if(front > 1.0 )  
+			{
+				if(left.min < 0.30)
+				{	
+					this->pBrain->drive()->setVelocity(0., -0.1, 0.0);
+					usleep(1000);
+				}
+				if(right.min <0.30)
+				{
+					this->pBrain->drive()->setVelocity(0.0, 0.1, 0.0 );
+					usleep(1000);
+				}
+				if(left.min >= 0.3 && right.min >= 0.30 )
+				{
+					
+					//odomPos1 = this->pBrain->odom()->getPosition();
+
+				//	this->pBrain->odom()->set( odomPos1.x(), odomPos1.y(), odomPos1.phi() );
+				//	this->pBrain->drive()->stopPointing();
+				//	std::cerr << "Driving to coordinate " << front << std::endl;
+					this->pBrain->drive()->setDestination(Coordinate(goalX, goalY));
+					this->pBrain->drive()->go();
+			
+				//	return true;
+						
+				}
+			}
+		//	else  this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.0 );
+		 i++;
+		}while(i < 1);
+	if(i >= 1) i = 0;
+	//	return true;                                                                                                                                                              usleep(10000);
+		usleep(1000);
+	}while(odomPos1.x() < goalX);
+	
+	this->pBrain->drive()->setVelocity(0.0, 0.0, 0.0);
+		
+	this->pBrain->drive()->niceStop();
+	usleep( 200000 );
+	
+	return true;	
+	}
+
+	
+};

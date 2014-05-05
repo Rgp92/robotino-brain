@@ -18,10 +18,21 @@
  * See @link _LaserRangeFinder.h @endlink for documentation of @c \#define
  * parameters
  */
+
+
+class obstacleAvoidance
+{
+	public: 
+		float average;
+		float temp;
+		float min; 
+};
 class _LaserRangeFinder :
 	public Axon,
 	public rec::robotino::api2::LaserRangeFinder
 {
+
+ friend class obstacleAvoidance;
  public:
 	/**
 	 * Constructs _LaserRangeFinder
@@ -64,6 +75,12 @@ class _LaserRangeFinder :
 	
 	bool checkFront();
 
+	obstacleAvoidance sensorLeft(const float *rangev);
+	
+	obstacleAvoidance sensorRight(const float *rangev);
+
+	obstacleAvoidance sensorFront(const float *rangev);
+
  private:
 	rec::robotino::api2::LaserRangeFinderReadings
 	/// The last laserRangeFinderReadings object
@@ -86,6 +103,8 @@ class _LaserRangeFinder :
 	 * See RobotinoAPI2 documentation for details.
 	 */
 	void scanEvent( const rec::robotino::api2::LaserRangeFinderReadings & scan );
+
 };
+
 
 #endif
