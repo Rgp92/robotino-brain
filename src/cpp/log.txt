@@ -2718,5 +2718,68 @@ Omnidrive: resuming drive
 Switched to manual drive mode
 Omnidrive: resuming drive
 Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
+Omnidrive: resuming drive
+Switched to manual drive mode
 OmniDrive: performing a nice stop
-Brain: exceeded LOOP_TIME, loop computation time used: 108 msecs

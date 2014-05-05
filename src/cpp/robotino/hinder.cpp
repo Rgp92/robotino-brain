@@ -62,8 +62,8 @@ float ObstacleClass::Del(float x, float y)
 
 float ObstacleClass::Nearby( float x, float y, float range )
 {
-	std::cerr<<"Searching for Obstacle near: " <<x << ","<<y<<"range: "<< range << std::endl;
-	std::cerr<<"==========================================="std::endl;
+	//std::cerr<<"Searching for Obstacle near: " <<x << ","<<y<<"range: "<< range << std::endl;
+	//std::cerr<<"==========================================="std::endl;
 	bool SomethingFound = false; // Flag to check if obstacle is found or not
 	Node *TempNode = RootNode;
 
@@ -82,7 +82,7 @@ float ObstacleClass::Nearby( float x, float y, float range )
 	else
 	{    // if TempNode->Next() != NULL, then there are many nodes in the list 
 		do
-		{	// go through all nodes and check if 		
+		{	// go through all nodes and check if something is inside. same as before		
 			if( (TempNode->ValueX()>= x - range && TempNode->ValueX() <= x + range) && (TempNode->ValueY()>= y -range && TempNode->ValueY() <= y+range))
 			{
 				std::cerr <<"X: "<<TempNode->ValueX()<<" Y: " << TempNode->ValueY() << std::endl;
@@ -90,7 +90,7 @@ float ObstacleClass::Nearby( float x, float y, float range )
 			}
 			TempNode = TempNode->Next();
 
-		}while( TempNode != NULL );
+		}while( TempNode != NULL ); // loop until tempnode == null== last node in the list
 	}
 	
 	if(SomethingFound)
@@ -101,12 +101,12 @@ float ObstacleClass::Nearby( float x, float y, float range )
 } 
 
 bool ObstacleClass::IsObstacle(float x, float y)
-{
+{	//check if one exact coordinate is an obstacle. This only check one koordinate a time and not the one around. 
 	return Nearby( x, y, 0 );
 }
 
 void ObstacleClass::List()
-{
+{	// loops through the node and print the x and y.
 	Node *TempNode = RootNode;
 	
 	//No nodes 
