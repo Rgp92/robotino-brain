@@ -5,6 +5,7 @@
 #include "robotino/headers/_LaserRangeFinder.h"
 #include "robotino/headers/hinder.h"
 #include "robotino/headers/_DistanceSensors.h"
+#include "robotino/headers/gridnav.h"
 
 #include "geometry/All.h"
 
@@ -18,6 +19,7 @@
 #include <vector>
 #include <stdexcept>
 #include <thread>
+
 
 
 /// The maximum height of a coordinate from Kinect that will be considered for fetching
@@ -1171,7 +1173,53 @@ class Control
 
 	bool naviger( float goalX, float goalY )
 	{
-		int i = 0;
+		AngularCoordinate odomrobotPos;
+		gridnav robotPosx, robotPosy;
+		//int change;
+		//float newDirection;
+		
+		this->pBrain->odom()->set( 0.0, 0.0, 0.0 );
+
+		odomrobotPos = this->pBrain->odom()->getPosition();
+		robotPosx.robot_x = odomrobotPos.x();
+		//this->pBrain->gdn()->robot_y = odomrobotPos.y();
+
+		std::cerr<<"StartX: "<<odomrobotPos.x()<<"StartY: "<< odomrobotPos.y()<<std::endl;
+		/*this->pBrain->gdn()->goal_x  = goalX;	
+		this->pBrain->gdn()->goal_y = goalY;
+		std::cerr<<"GoalX: "<<goalX<<" "<<goalY<<std::endl;
+
+		this->pBrain->gdn()->init();
+	
+		this->pBrain->gdn()->replan();
+		
+
+		while( (this->pBrain->gdn()->goal_x != (this->pBrain->gdn()->robot_x + 0.5 ) ) || (this->pBrain->gdn()->goal_y != (this->pBrain->gdn()->robot_y + 0.5) ) )
+		{
+			change = this->pBrain->gdn()->checkSensor();
+
+			if(change) this->pBrain->gdn()->updateMap();
+
+			if(change) this->pBrain->gdn()->replan();
+
+			newDirection= this->pBrain->gdn()->checkPlan(1, 1);
+			this->pBrain->gdn()->moveRobot(change);
+
+			std::cerr<<" "<<this->pBrain->gdn()->robot_x<<" "<< this->pBrain->gdn()->robot_y<<std::endl;
+			 
+		} */
+	return true; 	
+	}
+
+
+		
+
+		
+
+		
+		
+		
+	/*	int i = 0;
 		//float right = 0;
 		//float left  = 0;
 		float front = 0;
@@ -1219,11 +1267,11 @@ class Control
 
 		
 		do
-		{
+	{
 		//	obstacleP();
 			this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
-			if ( left.min <= 0.4 ) this->pBrain->drive()->setVelocity(0.1, 0.1, 0.0);
-			if ( right.min <= 0.4 ) this->pBrain->drive()->setVelocity(0.1, -0.1, 0.0);
+		//	if ( left.min <= 0.4 ) this->pBrain->drive()->setVelocity(0.1, 0.1, 0.0);
+		//	if ( right.min <= 0.4 ) this->pBrain->drive()->setVelocity(0.1, -0.1, 0.0);
 			
 			if(front <=  1.0  )
 			{
@@ -1231,7 +1279,7 @@ class Control
 				this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
 				
 				
-					if( (right.average < left.average) && left.min > 0.30) 
+					if( (right.average < left.average) && left.min > 0.50) 
 					{
 						
 						std::cerr << "Go right\n" << std::endl;// roter til right
@@ -1240,7 +1288,7 @@ class Control
 
 
 					}
-					if( (left.average < right.average) && right.min > 0.30 )
+					if( (left.average < right.average) && right.min > 0.50 )
 					{
 						std::cerr << "Go left\n" << std::endl;// roter til left
 						this->pBrain->drive()->setVelocity( 0.1 , -0.1 , 0.0 );
@@ -1254,17 +1302,17 @@ class Control
 
 			if(front > 1.0 )  
 			{
-				if(left.min < 0.30)
+				if(left.min < 0.40)
 				{	
 					this->pBrain->drive()->setVelocity(0., -0.1, 0.0);
 					usleep(1000);
 				}
-				if(right.min <0.30)
+				if(right.min <0.40)
 				{
 					this->pBrain->drive()->setVelocity(0.0, 0.1, 0.0 );
 					usleep(1000);
 				}
-				if(left.min >= 0.3 && right.min >= 0.30 )
+				if(left.min >= 0.40 && right.min >= 0.40  )
 				{
 					
 					//odomPos1 = this->pBrain->odom()->getPosition();
@@ -1295,5 +1343,5 @@ class Control
 	return true;	
 	}
 
-	
+	*/
 };

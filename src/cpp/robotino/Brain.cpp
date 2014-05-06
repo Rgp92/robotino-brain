@@ -91,6 +91,11 @@ Brain::dist()
 	return this->pDistSensors;
 }
 
+gridnav *
+Brain::gdn()
+{
+	return this->pGDN;
+}
 bool
 Brain::hasLRF()
 {

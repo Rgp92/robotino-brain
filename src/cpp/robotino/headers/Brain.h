@@ -21,7 +21,7 @@ class _DistanceSensors;
 class _LaserRangeFinder;
 
 class KinectReader;
-
+class gridnav;
 
 /// Desired loop time of the main loop in milliseconds, to avoid overloading
 /// the Robotino command bridge
@@ -89,6 +89,8 @@ class Brain : public rec::robotino::api2::Com
 	_LaserRangeFinder * lrf();
 
 	_DistanceSensors * dist();
+
+	gridnav * gdn();
 
 	/** Returns if a LaserRangeFinder is present
 	 *
@@ -196,6 +198,9 @@ class Brain : public rec::robotino::api2::Com
 	KinectReader
 	/// Holds a pointer to the _KinectReader object
 		* pKinect;
+
+	gridnav 
+		* pGDN;
 
 	std::thread
 	/// Thread for running the main loop of Brain
