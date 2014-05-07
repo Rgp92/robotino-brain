@@ -1121,93 +1121,106 @@ class Control
 	{
 		const float *rangev;  // rangevector
 		unsigned int rangec;  // rangecount
+
 		rec::robotino::api2::LaserRangeFinderReadings  r;
 
-		//float obsarray[514];
-		float temp		= 0;
-		float min_distance	= 5.6;
-		float left		= 0;
-		float right		= 0;
-		//float front 		= 0;
-		//int pointMin;
 		r = this->pBrain ->lrf()->getReadings();
 		r.ranges( &rangev, &rangec );
 
-		
-		for(unsigned int i = 225; i < 288; i++)		// Les av verdier for front sensor.
-		{
-			temp = rangev[i];
-			if(temp < min_distance )min_distance = temp;
+		//float obsarray[514];
 
-		}	
+		float left		= 0;
+		float right		= 0;
+		float front 		= 0;
+		//int pointMin;
+
+
+		do{
+
+			right	= sensorRight();	// les av høyre side
+			left	= sensorLeft();		// les av venstre side
+			front	= sensorFront();	//les av front sensor
+
+			this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.0 );
+
 			//std::cerr << "Er det hindring forran Robotino? "<<min_distance << std::endl;
+			//this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.0 );
 
-			if( temp < 1.0 ) // Les av høyre og venstre side. Den med mest verdi gir robotino beskjed om hvor den skal
+			if( front < 1.0 ) // Les av høyre og venstre side. Den med mest verdi gir robotino beskjed om hvor den skal
 			{
-				right	= sensorRight();	// les av høyre side
-				left	= sensorLeft();		// les av venstre side
-
-				
+				std::cerr << "noe i veien forran" << std::endl;
 
 				// Velger å rotere roboten til den siden med hindring som er ikke nærmest
 				if( right > left )
 				{
 					std::cerr << "Go left\n" << std::endl;// roter til venstre
-					this->pBrain->drive()->setVelocity( 0.0 , -0.1 , 0.0 );
+
+					if( (front <= 1.0 && right <=1.0) ) this->pBrain->drive()->setVelocity( 0.1 , 0.1 , 0.0 );
+					if( (front >= 1.0 && right <= 0.6) ) this->pBrain->drive()->setVelocity( 0.1 ,  0.0, 0.0 );
+
 				}
 				else if( right < left )
 				{
 					std::cerr << "Go right\n" << std::endl;// roter til høyre
-					this->pBrain->drive()->setVelocity( 0.0 , 0.1 , 0.0 );
+					//this->pBrain->drive()->setVelocity( 0.0 , 0.1 , 0.0 );
 				}
 				else
 				{
-					this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
+					std::cerr << "Ingen hindring." <<std::endl;
+					//this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
 				}
 			}
-	
-			usleep(1000);
 		
-
-	} 
+			usleep(1000);
+		}while(true);
+		
+		
+	}
 
 	bool naviger( float goalX, float goalY )
 	{
 		AngularCoordinate odomrobotPos;
-		gridnav robotPosx, robotPosy;
+		gridnav robotPosx, robotPosy, Goalx, Goaly, a;
 		//int change;
-		//float newDirection;
+		float newDirection;
 		
 		this->pBrain->odom()->set( 0.0, 0.0, 0.0 );
 
 		odomrobotPos = this->pBrain->odom()->getPosition();
-		robotPosx.robot_x = odomrobotPos.x();
+	//	robotPosx.robot_x = odomrobotPos.x();
+	// 	robotPosy.robot_y = odomrobotPos.y();
 		//this->pBrain->gdn()->robot_y = odomrobotPos.y();
 
-		std::cerr<<"StartX: "<<odomrobotPos.x()<<"StartY: "<< odomrobotPos.y()<<std::endl;
-		/*this->pBrain->gdn()->goal_x  = goalX;	
-		this->pBrain->gdn()->goal_y = goalY;
-		std::cerr<<"GoalX: "<<goalX<<" "<<goalY<<std::endl;
-
-		this->pBrain->gdn()->init();
+		//std::cerr<<"StartX: "<<robotPosx.robot_x<<" StartY: "<< robotPosy.robot_y<<std::endl;
+		//Goalx.goal_x  = goalX;	
+		//Goaly.goal_y  = goalY;
+		//std::cerr<<"GoalX: "<<Goalx.goal_x<<" "<<Goaly.goal_y<<std::endl;
 	
-		this->pBrain->gdn()->replan();
-		
+		a.init();
+		a.readMap();
+		a.replan();
+		//change = a.cellCost(1,1);
+		//a.printCost();
+		std::cerr<<"StartX: "<<robotPosx.robot_x<<" StartY: "<< robotPosy.robot_y<<std::endl;
+		std::cerr<<"GoalX: "<<Goalx.goal_x<<" "<<Goaly.goal_y<<std::endl;
 
-		while( (this->pBrain->gdn()->goal_x != (this->pBrain->gdn()->robot_x + 0.5 ) ) || (this->pBrain->gdn()->goal_y != (this->pBrain->gdn()->robot_y + 0.5) ) )
+
+		while( (Goalx.goal_x !=(int) (robotPosx.robot_x + 0.5) ) ||  (Goalx.goal_y != (int)(robotPosy.robot_y + 0.5) )  )
 		{
-			change = this->pBrain->gdn()->checkSensor();
+			//change = a.checkSensor();
 
-			if(change) this->pBrain->gdn()->updateMap();
+			//if(change) a.updateMap();
 
-			if(change) this->pBrain->gdn()->replan();
+			//if(change) a.replan();
 
-			newDirection= this->pBrain->gdn()->checkPlan(1, 1);
-			this->pBrain->gdn()->moveRobot(change);
+			newDirection= a.checkPlan( (int)robotPosx.robot_x + 0.5, (int)robotPosy.robot_y + 0.5 );
+			a.moveRobot(newDirection);
 
-			std::cerr<<" "<<this->pBrain->gdn()->robot_x<<" "<< this->pBrain->gdn()->robot_y<<std::endl;
-			 
-		} */
+			std::cerr<<" "<< robotPosx.robot_x <<" "<< robotPosy.robot_y;
+			//std::cerr<<"GoalX: "<<Goalx.goal_x<<" "<<Goaly.goal_y<<" " << newDirection<<std::endl;
+
+			 usleep(1000);
+		} 
 	return true; 	
 	}
 

@@ -4,8 +4,6 @@
 
 gridnav::gridnav()
 {
-	this->FULL  = true;
-
 	this->SCHEDULED = true;
 
 	this->NOT_SCHEDULED = false;
@@ -23,13 +21,13 @@ gridnav::init()
 	{
 		for(int j = 0; j < GRID_SIZE; j++)
 		{
-			scheduled[i][j] = NOT_SCHEDULED;
+			scheduled[i][j] = this->NOT_SCHEDULED;
 			occupancy[i][j] = EMPTY;
 
 
 			if(i==0 || (i == (GRID_SIZE - 1)) || (j == 0)|| (j == (GRID_SIZE - 1)))
 			{
-				occupancy[i][j] = this->FULL;
+				occupancy[i][j] = FULL;
 				scheduled[i][j] = this->SCHEDULED;
 			}
 
@@ -47,7 +45,8 @@ gridnav::init()
 
 	open_list[GRID_SIZE * GRID_SIZE - 1].next = EMPTY;
 	free_head = 0;
-	open_head = EMPTY; 
+	open_head = EMPTY;
+	
 }
 
 int 
@@ -211,15 +210,58 @@ gridnav::expand(int x, int y)
 	}
 }
 
-/*void gridnav::readMap()
+
+void gridnav::xerror(char *msg)
+{
+	std::cerr<<" "<<msg<<std::endl;
+	exit(1);
+}
+
+void gridnav::readMap()
 {
 	FILE *file;
 
 	char c;
-	
+	int k;	
 
-	file = fopen("map.txt", "r");	
-}*/
+	file = std::fopen("map.txt", "r");
+	if(file == NULL)  std::cerr<<" cant open file";//xerror("readmap: can't open map.txt");
+
+	for(int j = (GRID_SIZE)-2; j>0; j--)
+	{
+		for( int i = 1; i <= (GRID_SIZE-2); i++)
+		{
+			//Get a character
+			k = std::fscanf(file, "%c", &c);
+			
+			//if an obstacle
+			if(c == 'O')
+			{
+				occupancy[i][j] = FULL;
+			}
+
+			if( c == 'R' )
+			{
+				robot_x = (float) i;
+				robot_y = (float) j;
+			}
+
+			if( c == 'G' )
+			{
+				goal_x = i;	
+				goal_y = j;
+				cost[i][j] = 0;
+			}
+
+			if(c == '\n' )
+				break;
+		}
+	while( c != '\n')
+	k = std::fscanf(file, "%c", &c);
+	}
+
+ std::fclose(file);
+}
 
 int gridnav::checkSensor()
 {
@@ -251,6 +293,8 @@ void gridnav::replan()
 
 float gridnav::checkPlan(int x, int y)
 {
+
+	
 	float 
 		x_part = 0,
 		y_part = 0, 
@@ -330,7 +374,42 @@ void gridnav::moveRobot(float heading)
 
 	x_part = MAX_VELOCITY * cos(heading);
 	y_part = MAX_VELOCITY * sin(heading);
+
+
+	robot_x +=x_part;
+	robot_y +=y_part;
+
 	
-	robot_x += x_part;
-	robot_y += y_part;
+
+}
+
+void gridnav::printCost()
+{
+	float highestCost = 0;
+
+	for(int j = GRID_SIZE - 2; j > 0; j--)
+	{
+		for(int i = 1; i < GRID_SIZE - 1; i++)
+		{
+			if( (cost[i][j] != BIG_COST) && (cost[i][j] > highestCost))
+				highestCost = cost[i][j];
+		}
+	}
+
+
+
+	std::cerr<<" "<<GRID_SIZE - 2<<" "<< GRID_SIZE - 2 <<std::endl;
+
+	for(int j = GRID_SIZE - 2; j > 0; j--)
+	{
+		for(int i = GRID_SIZE - 2; i > 0; i--)
+		{
+			if(cost[i][j] > highestCost )
+			std::cerr<<" "<<highestCost/2<<std::endl;
+			else
+			std::cerr<<" "<<cost[i][j]/3<<std::endl;
+	
+		}
+	}
+
 }

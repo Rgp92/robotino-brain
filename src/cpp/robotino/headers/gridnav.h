@@ -10,7 +10,7 @@ unngå grense problemer.*/
 #define BIG_COST 500
 #define MAX_VELOCITY 1.0
 #define EMPTY -1
-
+#define FULL 1
 #define SQRT2 1.4142136
 
 typedef struct 
@@ -35,7 +35,7 @@ class gridnav
 	float cost[GRID_SIZE][GRID_SIZE]; // cost from cell to goal
 
 	float robot_x, robot_y; // where the robot is
-	float goal_x, goal_y;	//Where the goal is
+	int goal_x, goal_y;	//Where the goal is
 	int cell_count; // keeps track of computation
 
 	node_t open_list[GRID_SIZE * GRID_SIZE];
@@ -55,7 +55,7 @@ class gridnav
 
 	void expand(int x, int y);
 
-	void readmap();
+	void readMap();
 
 	int checkSensor();
 
@@ -66,11 +66,13 @@ class gridnav
 	float checkPlan(int x, int y);
 
 	void moveRobot(float heading);
+	
+	void printCost();
+	
+	void xerror(char *msg);
 
  private:
 	bool 
-
-		FULL,
 
 		SCHEDULED,
 

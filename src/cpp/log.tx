@@ -1,5 +1,7 @@
 Brain logEvent():	1: State changed to 1
 Brain logEvent():	1: State changed to 2
-Brain logEvent():	1: Disconnected
-Brain logEvent():	1: State changed to 0
-Error during brain initialization
+Brain logEvent():	1: State changed to 3
+Brain logEvent():	1: Connected
+Brain connectedEvent()
+Odometry successfully set to 0 , 0 , 0  (adjusted by 1)
+Odometry successfully set to 0 , 0 , 0  (adjusted by 1)
