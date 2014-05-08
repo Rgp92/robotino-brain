@@ -1169,6 +1169,8 @@ class Control
 					std::cerr << "Ingen hindring." <<std::endl;
 					//this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
 				}
+
+				
 			}
 		
 			usleep(1000);
@@ -1179,7 +1181,7 @@ class Control
 
 	bool naviger( float goalX, float goalY )
 	{
-		AngularCoordinate odomrobotPos;
+	/*	AngularCoordinate odomrobotPos;
 		gridnav robotPosx, robotPosy, Goalx, Goaly, a;
 		//int change;
 		float newDirection;
@@ -1205,7 +1207,7 @@ class Control
 		std::cerr<<"GoalX: "<<Goalx.goal_x<<" "<<Goaly.goal_y<<std::endl;
 
 
-		while( (Goalx.goal_x !=(int) (robotPosx.robot_x + 0.5) ) ||  (Goalx.goal_y != (int)(robotPosy.robot_y + 0.5) )  )
+		while( (Goalx.goal_x !=(int) (robotPosx.robot_x + 0.5) ) || (Goalx.goal_y != (int)(robotPosy.robot_y + 0.5) )  )
 		{
 			//change = a.checkSensor();
 
@@ -1225,14 +1227,14 @@ class Control
 	}
 
 
-		
+		*/
 
 		
 
 		
 		
 		
-	/*	int i = 0;
+		int i = 0;
 		//float right = 0;
 		//float left  = 0;
 		float front = 0;
@@ -1292,19 +1294,19 @@ class Control
 				this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
 				
 				
-					if( (right.average < left.average) && left.min > 0.50) 
+					if( left.min < right.min ) 
 					{
 						
 						std::cerr << "Go right\n" << std::endl;// roter til right
-						this->pBrain->drive()->setVelocity( 0.1 , 0.1 , 0.0 );
+						this->pBrain->drive()->setVelocity( 0.1 , -0.1 , 0.0 );
 						odomPos1 = this->pBrain->odom()->getPosition();
 
 
 					}
-					if( (left.average < right.average) && right.min > 0.50 )
+					if( right.min < left.min )
 					{
 						std::cerr << "Go left\n" << std::endl;// roter til left
-						this->pBrain->drive()->setVelocity( 0.1 , -0.1 , 0.0 );
+						this->pBrain->drive()->setVelocity( 0.1 , 0.1 , 0.0 );
 						odomPos1 = this->pBrain->odom()->getPosition();
 
 					}
@@ -1317,12 +1319,12 @@ class Control
 			{
 				if(left.min < 0.40)
 				{	
-					this->pBrain->drive()->setVelocity(0., -0.1, 0.0);
+					this->pBrain->drive()->setVelocity(0.1, -0.1, 0.0);
 					usleep(1000);
 				}
 				if(right.min <0.40)
 				{
-					this->pBrain->drive()->setVelocity(0.0, 0.1, 0.0 );
+					this->pBrain->drive()->setVelocity(0.1, 0.1, 0.0 );
 					usleep(1000);
 				}
 				if(left.min >= 0.40 && right.min >= 0.40  )
@@ -1342,7 +1344,8 @@ class Control
 			}
 		//	else  this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.0 );
 		 i++;
-		}while(i < 1);
+		usleep(1000);
+		}while((i < 1));
 	if(i >= 1) i = 0;
 	//	return true;                                                                                                                                                              usleep(10000);
 		usleep(1000);
@@ -1356,5 +1359,5 @@ class Control
 	return true;	
 	}
 
-	*/
+	
 };
