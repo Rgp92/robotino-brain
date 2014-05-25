@@ -115,14 +115,19 @@ _LaserRangeFinder::getDistance(Angle angle)
 
 
 obstacleAvoidance
-_LaserRangeFinder::sensorFront ( const float *rangev)
+_LaserRangeFinder::sensorFront ()
 {
 	
 	obstacleAvoidance Result; 
+	const float *rangev;  // rangevector
+	unsigned int rangec;  // rangecounty
+
  	 	
 	Result.temp = 0;
 	Result.min  = 5.6;
 	Result.average = 0;
+	//Result.tempI = 0;
+	this->latestReadings.ranges(&rangev, &rangec);
 
 		
 		for(unsigned int i = 215; i <= 297; i++)
@@ -130,6 +135,7 @@ _LaserRangeFinder::sensorFront ( const float *rangev)
 			Result.average = rangev[i] + Result.average;
 			Result.temp = rangev[i];
 			if( Result.temp < Result.min ) Result.min = Result.temp;
+			if(rangev[i] <= 1.0) Result.tempI[i] = i;
 		}
 		Result.average = Result.average / 83.0;
 		std::cerr<<"Front: "<<Result.min<<std::endl;
@@ -140,23 +146,28 @@ _LaserRangeFinder::sensorFront ( const float *rangev)
 }
  
 obstacleAvoidance
-_LaserRangeFinder::sensorRight( const float *rangev)
+_LaserRangeFinder::sensorRight()
 {
 	
 	obstacleAvoidance Result;
-		
+	const float *rangev;  // rangevector
+	unsigned int rangec;  // rangecounty
+	
 
  	
 	Result.temp = 0;
 	Result.min  = 5.6;
 	Result.average = 0;
+	//Result.tempI = 0;
+	this->latestReadings.ranges(&rangev, &rangec);
 
 		
-		for(unsigned int i = 0; i <= 214; i++)
+		for(unsigned int i = 0; i <= 214; i++) // ~60 grader
 		{
 			Result.average = rangev[i] + Result.average;
 			Result.temp = rangev[i];
 			if( Result.temp < Result.min ) Result.min = Result.temp;
+			if( rangev[i] <= 0.60) Result.tempI[i] = i;
 		}
 		
 
@@ -168,22 +179,27 @@ _LaserRangeFinder::sensorRight( const float *rangev)
 }
 
 obstacleAvoidance
-_LaserRangeFinder::sensorLeft(const float *rangev )
+_LaserRangeFinder::sensorLeft( )
 {
 	
 	obstacleAvoidance Result;
-	
+	const float *rangev;  // rangevector
+	unsigned int rangec;  // rangecounty
+
 
  	
 	Result.temp = 0;
 	Result.min  = 5.6;
 	Result.average = 0;
-		
-		for(unsigned int i = 298; i <= 512; i++)
+	//Result.temp
+	this->latestReadings.ranges(&rangev, &rangec);
+
+		for(unsigned int i = 298; i <= 512; i++) // ~60 grader
 		{
 			Result.average = rangev[i] + Result.average;
 			Result.temp = rangev[i];
 			if( Result.temp < Result.min ) Result.min = Result.temp;
+			if( rangev[i] <= 0.60 ) Result.tempI[i] = i;
 		}
 		Result.average = Result.average/ 214.0;
 		std::cerr<<"Left: "<<Result.min<<std::endl;

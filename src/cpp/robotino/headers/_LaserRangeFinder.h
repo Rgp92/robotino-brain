@@ -25,7 +25,10 @@ class obstacleAvoidance
 	public: 
 		float average;
 		float temp;
-		float min; 
+		float min;
+		int *tempI; 
+		int tempIMax;
+		int tempIMin;
 };
 class _LaserRangeFinder :
 	public Axon,
@@ -75,11 +78,11 @@ class _LaserRangeFinder :
 	
 	bool checkFront();
 
-	obstacleAvoidance sensorLeft(const float *rangev);
+	obstacleAvoidance sensorLeft();
 	
-	obstacleAvoidance sensorRight(const float *rangev);
+	obstacleAvoidance sensorRight();
 
-	obstacleAvoidance sensorFront(const float *rangev);
+	obstacleAvoidance sensorFront();
 
  private:
 	rec::robotino::api2::LaserRangeFinderReadings

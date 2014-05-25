@@ -18,7 +18,7 @@ class AngularCoordinate;
 
 	// Speed
 /// The maximum top speed when setting speed manually
-#define OMNIDRIVE_MAX_SPEED	0.7
+#define OMNIDRIVE_MAX_SPEED	0.5
 
 	// Travel
 
@@ -48,7 +48,7 @@ class AngularCoordinate;
 /// The maximum speed Robotino will manouver at.
 /// Manouvering means using the drive in both x and y directions, manouvering is
 /// automatically engaged when Robotino is close to the destination.
-#define OMNIDRIVE_MANOUVER_MAX_SPEED	0.3
+#define OMNIDRIVE_MANOUVER_MAX_SPEED	0.1
 /// The minimum speed Robotino will manouver at
 /// Above a quarter of this value, this value will be used. Below a quarter,
 /// the speed will be set to 0.
