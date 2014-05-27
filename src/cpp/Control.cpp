@@ -298,7 +298,7 @@ class Control
 			}
 			else if( command == "hindring" )
 			{
-				this->calcObstaclePos();
+				//this->calcObstaclePos();
 			}
 
 			else if( command == "obstacle")
@@ -1210,7 +1210,7 @@ class Control
 		usleep(100000);
 	}
 
-	void calcObstaclePos()
+	/*void calcObstaclePos()
 	{
 		const float *rangev;  // rangevector
 		unsigned int rangec;  // rangecount
@@ -1225,34 +1225,80 @@ class Control
 		float robotY		= robotPos.y();
 		float laserAngle	= 0;
 		float objectLength	= 0;
-		float objectX = 0.0, objectY = 0.0;
-		
+		float objectX = 0.0, objectY = 0.0, objectHyp = 0.0, objectXmin = 0.0, objectYmin = 0.0, minHyp= 0.0, min_distance = 5.6, temp = 0.0;
+		 
 		int hindringer		= 0;
-		int i=0, y=1, z=0,v=0,h=0;
+		int  y=1, z=0,v=0,h=0;
 
 		int retning = 0;
 		
 		robotPos	= Coordinate ( robotX , robotY );
 
-		for(i = 0; i < 513; i++)
+		minHyp = sqrt( (0.3*0.3) + (1) );
+
+		for(unsigned int i = 0; i <= 256; i++)
 		{
-			r = this->pBrain ->lrf()->getReadings();
-			r.ranges( &rangev, &rangec );
+			temp = rangev[i] + temp;
 
-			objectLength	= rangev[ i ];			// Leser avstand til objekt i cm
-			laserAngle	= ( (180.0/512.0) * i );	// Beregner vinkel til objekt
-
-			if ( i > 0 && i <= 256 )	// Høyre
+			if(rangev[i]< min_R_distance)
 			{
-				laserAngle	= ( (180.0/512.0) * i );	// Beregner vinkel til objekt
-
-				objectX		= ( (objectLength * 1.0) * cos(laserAngle * 3.141592 / 180.0) );
-				objectY		= ( (objectLength * 1.0) * sin(laserAngle * 3.141592 / 180.0) ); 
-				objectPos	= Coordinate ( objectX + robotY , objectY + robotX );
-				
-				if(objectY < 0.3) v = objectX;
-				std::cerr << "object Hx: " << objectX << std::endl;
+				min_R_distance	= rangev[i];
+				min_i		= [i];
 			}
+		}
+
+		if(min_R_distance < minHyp)
+		{
+			laserAngle	= ( (180.0/512.0) * min_i );	// Beregner vinkel til objekt
+
+			objectX		= ( (objectLength * 1.0) * cos( laserAngle ) );
+			objectY		= ( (objectLength * 1.0) * sin( laserAngle ) );
+
+			objectXmin = sqrt( (objectLength*objectLength) + (objectY*objectY) );
+			objectYmin = sqrt( (objectLength*objectLength) - (objectX*objectX) );
+			objectHyp = sqrt( (0.3*0.3) + (1*1) );
+
+			objectPos	= Coordinate ( objectXmin , objectYmin );
+
+			if(objectHyp < 1.044) h = rangev[min_i];
+				
+		}
+								
+			std::cerr << "object Hx: " << -objectXmin << "\tobject Hy: " << objectY << "\tMin avstand til objekt: " << min_distance << std::endl;
+
+			
+
+
+
+		for(unsigned int i = 257; i < 513; i++)
+		{
+			z = ( i  * 1 - ( 2 * y ) );
+
+			temp = rangev[i] + temp;
+
+			if(rangev[i]< min_R_distance)
+			{
+				min_R_distance	= rangev[i];
+				min_i		= [i];
+			}
+		}
+
+		if(min_V_distance < minHyp)
+		{
+			laserAngle	= ( (180.0/512.0) * z );	// Beregner vinkel til objekt
+
+			objectX		= ( (objectLength * 1.0) * cos( laserAngle ) );
+			objectY		= ( (objectLength * 1.0) * sin( laserAngle ) );
+
+			objectXmin = sqrt( (objectLength*objectLength) + (objectY*objectY) );
+			objectYmin = sqrt( (objectLength*objectLength) - (objectX*objectX) );
+			objectHyp = sqrt( (0.3*0.3) + (1*1) );
+
+			objectPos	= Coordinate ( objectXmin , objectYmin );
+
+			if(objectHyp < 1.044) h = rangev[min_i];
+				
+		}
 
 			if ( i > 256 && i < 513 )	// Venstre 
 			{
@@ -1260,17 +1306,29 @@ class Control
 				z = ( i  * 1 - ( 2 * y ) );
 				laserAngle	= ( (180.0/512.0) * z );	// Beregner vinkel til objekt
 
-				objectX		= ( (objectLength * 1.0) * cos(laserAngle * 3.141592 / 180.0) );
-				objectY		= ( (objectLength * 1.0) * sin(laserAngle * 3.141592 / 180.0) ); 
-				objectPos	= Coordinate ( objectX + robotY , objectY + robotX );
+				if(rangev[i] < min_distance)
+				{
+				min_distance = rangev[i];
+				objectX		= ( (objectLength * 1.0) * cos( laserAngle ) );
+				objectY		= ( (objectLength * 1.0) * sin( laserAngle ) );
+
+				objectXmin = sqrt( (objectLength*objectLength) + (objectY*objectY) );
+				objectYmin = sqrt( (objectLength*objectLength) - (objectX*objectX) );
+				objectHyp = sqrt( (0.3*0.3) + (1*1) );
+
+				objectPos	= Coordinate ( -objectXmin , objectYmin );
+
+				if(objectHyp < 1.044) v = rangev[i];
+				}
+
+				std::cerr << "object Vx: " << -objectXmin << "\tobject Vy: " << objectY << "\tMin avstand til objekt: " << min_distance << std::endl;
 				
-				if(objectY < 0.3) h = objectX;
-				std::cerr << "object Vx: " << objectX << std::endl;
 				y++;
 			}
 
-			if ( objectLength <= 1.4 )
+			if ( objectLength < minHyp )
 			{
+
 			objectX		= ( (objectLength * 1.0) * cos(laserAngle * 3.141592 / 180.0) );
 			objectY		= ( (objectLength * 1.0) * sin(laserAngle * 3.141592 / 180.0) ); 
 			objectPos	= Coordinate ( objectX + robotY , objectY + robotX );
@@ -1286,7 +1344,7 @@ class Control
 			}
 
 			usleep(1000);
-		}
+		
 
 		if ( v < h ) retning = 1;
 		if ( h < v ) retning = 2;
@@ -1297,14 +1355,16 @@ class Control
 
 		if ( hindringer == 0 ) std::cerr << "Ingen hindringer innenfor 100 cm avstand." << std::endl;
 
-		if( retning == 2) /*std::cerr << "VIII MÅÅ GÅÅ TILL HØØYYRREE" << std::endl; */callright();
-		else if( retning == 1) /* std::cerr << "VIII MÅÅ GÅÅ TILL VEENNSSTTRREE" << std::endl; */ calleft();
+		if( retning == 2) std::cerr << "VIII MÅÅ GÅÅ TILL HØØYYRREE" << std::endl; callright();
+		else if( retning == 1)  std::cerr << "VIII MÅÅ GÅÅ TILL VEENNSSTTRREE" << std::endl; *calleft();
 		else std::cerr << "rett frem" << std::endl; // calleft();
 		
 
 		//std::cerr << "Sensor leser av " << objectLength * 100 << " cm til objekt ved 0 grader forran robot." << std::endl;
 		//std::cerr << "Robotens koordinat: " << robotX << "," << robotY << " " << this->pBrain->odom()->getPhi() << ". Objektets koordinat: " << objectPos << std::endl;
 	}
+*/
+
 
 	void obstacleP()	// se etter hindringer mindre enn 1m
 	{
@@ -1440,9 +1500,9 @@ class Control
 		bool okx	= false;
 		bool oky	= false;
 		bool fortsett	= true;
-		//bool snu	= false;
+		bool snu	= false;
 
-		//int i = 0;
+		int i = 0;
 
 		//const float *rangev;  // rangevector
 		//unsigned int rangec;  // rangecounty
@@ -1457,7 +1517,7 @@ class Control
 
 		//rec::robotino::api2::LaserRangeFinderReadings  r;
 		//obstacleAvoidance right, left, front2;
-		//float front, right, left;
+		float front, right, left;
 	//	usleep( 200000 );
 
 		//r = this->pBrain ->lrf()->getReadings();
@@ -1465,22 +1525,22 @@ class Control
 		//Hinder.List();
 		//Pos = this->pBrain->odom()->getPosition();
 
-		//snu	= turnPhi(goalX, goalY, Pos.phi());
+		snu	= turnPhi(goalX, goalY, Pos.phi());
 
-		//if (snu == true) std::cerr << "snur" << std::endl;
-		//if (snu == false) std::cerr << "ikke snu" << std::endl;
+		if (snu == true) std::cerr << "snur" << std::endl;
+		if (snu == false) std::cerr << "ikke snu" << std::endl;
 
-		//this->pBrain->drive()->setDestination(* destination);
-		//this->pBrain->drive()->go();
+		this->pBrain->drive()->setDestination(* destination);
+		this->pBrain->drive()->go();
 
 
 		//this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
 		//this->pBrain->drive()->setVelocity( 0.0 , 0.0, 3.14 );	// Hinder for nærme robot forran.
-/*
+
  	do
 	{
-		r = this->pBrain ->lrf()->getReadings();
-		r.ranges( &rangev, &rangec );
+	//	r = this->pBrain ->lrf()->getReadings();
+	//	r.ranges( &rangev, &rangec );
 
 		front = sensorFront();
 		right = sensorRight();
@@ -1489,31 +1549,30 @@ class Control
 		odomPos1 = this->pBrain->odom()->getPosition();
 		Pos = this->pBrain->odom()->getPosition();
 
-		sensorN5 = this->pBrain->dist()->sensorDistance(5);
-		sensorN4 = this->pBrain->dist()->sensorDistance(4);
+		//sensorN5 = this->pBrain->dist()->sensorDistance(5);
+		//sensorN4 = this->pBrain->dist()->sensorDistance(4);
 		//std::cerr<<" "<< sensorN4<<std::endl;
 		//Hinder.List();
 		
-		snu	= turnPhi(goalX, goalY, Pos.phi());
+		//snu	= turnPhi(goalX, goalY, Pos.phi());
 
 		if (snu == true) std::cerr << "snur" << std::endl;
 		if (snu == false) std::cerr << "ikke snu" << std::endl;
 		
-		//if (snu) std::cerr << "kan snu" << std::endl;
-		//if (!snu) std::cerr << "kan ikke snu" << std::endl;
-*/
+	//	if (snu) std::cerr << "kan snu" << std::endl;
+	//	if (!snu) std::cerr << "kan ikke snu" << std::endl;
+
 
 
 		do
 		{
-			calcObstaclePos();
-			this->pBrain->drive()->setDestination(* destination);
-			this->pBrain->drive()->go();
+			//calcObstaclePos();
 
-			/*
-			if( sensorRundt() <= 0.60 && snu == true )
+
+			
+			if( front <= 0.7 && snu == true )
 			{
-				if( front < 0.6 )
+				if( front < 0.7 )
 				{
 					std::cerr << "Snur, men for nær forran" << std::endl;
  					this->pBrain->drive()->setVelocity( -0.1 , 0.0, 0.0 );	// Hinder for nærme robot forran.
@@ -1530,7 +1589,6 @@ class Control
 				}
 				else
 				{
-
 					std::cerr << snu << std::endl;
 					this->pBrain->drive()->setDestination(* destination);
 					this->pBrain->drive()->go();
@@ -1539,36 +1597,20 @@ class Control
 					std::cerr << Pos.phi() << std::endl;
 				}
 			}
-			*/
+			
 
-//			if( front <= 1.0 /*&& snu == false*/ )
-//			{
-				//std::cerr << snu << std::endl;
+			if( front <= 1.0 && snu == false)
+			{
+			std::cerr << snu << std::endl;
 			//std::cerr << turnPhi(goalX, goalY) << std::endl;
-		//	this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
+			this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
 
-				//frontS(minI, maxI); 
-				//odomPos1 = this->pBrain->odom()->getPosition();
 
-				/*angleradian = r.angle_max -  minI*0.35;
 
-				_x = cos(angleradian)* 1.0;
-				_y = sin(angleradian)* 1.0;
-				
-				Hinder.Add(odomPos1.x() + _x, odomPos1.y() + _y ); 
-
-				angleradian = r.angle_max - maxI*0.35;
-				_x = cos(angleradian) * 1.0;
-				_y = sin(angleradian) * 1.0;
-
-				Hinder.Add(odomPos1.x() + _x, odomPos1.y() + _y ); 
-				*/
-				
-
-//				if( left < right )	// Gå til høyre
-//				{
-//					std::cerr << "Go right\n" << std::endl;
-//					callright();
+				if( left < right )	// Gå til høyre
+				{
+					std::cerr << "Go right\n" << std::endl;
+					//calleft();
 					//newAngle = callright();
 
 					// hvis nådd pos orginal dest. 
@@ -1578,26 +1620,26 @@ class Control
 					//this->pBrain->drive()->go();
 
 					//vi skal til høyre, beregn 
-					/*
-					if ( front < 0.6  ) this->pBrain->drive()->setVelocity( 0.0 , -0.1 , 0.0 );	// til høyre 
-					else if ( front < 0.7 && leftObstacle() > 0.4 )
+					
+					if ( front < 0.7  ) this->pBrain->drive()->setVelocity( 0.0 , -0.1 , 0.0 );	// til høyre 
+					else if ( front < 0.9 && left > 0.4 )
 					{
 						//std::cerr << "Go right\n" << std::endl;			// roter til right
 						
 						this->pBrain->drive()->setVelocity( 0.1 , -0.1 , 0.0 );
-						odomPos1 = this->pBrain->odom()->getPosition();
-					}
+						//odomPos1 = this->pBrain->odom()->getPosition();
+					}/*
 					else
 					{
 						this->pBrain->drive()->setDestination(* destination);
 						this->pBrain->drive()->go();
-					}
-					*/
-//				}
-//				if( right < left )	// gå til venstre
-//				{
-//					std::cerr << "Go left\n" << std::endl;
-					//calleft();
+					}*/
+					
+				}
+				if( right < left )	// gå til venstre
+				{
+					std::cerr << "Go left\n" << std::endl;
+					//callright();
 
 					//vi skal venstre, beregn høyre og legg til 0.30m
 					//newPath = calleft();
@@ -1605,39 +1647,38 @@ class Control
 					//this->pBrain->drive()->go();
 
 					// calleft();
-	
-				
 
-
-
-					/*
-					if ( front < 0.6  ) this->pBrain->drive()->setVelocity( 0.0 , 0.1 , 0.0 );	// Hinder for nærme robot
-					else if( front < 0.7 && rightObstacle() > 0.4)
+					
+					if ( front < 0.7  ) this->pBrain->drive()->setVelocity( 0.0 , 0.1 , 0.0 );	// Hinder for nærme robot
+					else if( front < 0.9 && right > 0.4)
 					{
-						//std::cerr << "Go left\n" << std::endl;			// roter til left
+						std::cerr << "Go left\n" << std::endl;			// roter til left
 						this->pBrain->drive()->setVelocity( 0.1 , 0.1 , 0.0 );
-						odomPos1 = this->pBrain->odom()->getPosition();
-					}
+						//odomPos1 = this->pBrain->odom()->getPosition();
+					}/*
 					else
 					{
 						this->pBrain->drive()->setDestination(* destination);
 						this->pBrain->drive()->go();
 					}*/
-//				}
+				}
 				
 				//if( ( (front < 0.6) && (left < 0.3) ) || ( (front < 0.6) && (right < 0.3) ) ) 
-//				usleep(10000);	
-//			}
+				usleep(10000);	
+			}
 
-//			if( front > 1.0 )  
-//			{
-/*
+			if( front > 1.0 )  
+			{
+			//this->pBrain->drive()->setDestination(* destination);
+			//this->pBrain->drive()->go();
+
+				//std::cerr<<"printfront: "<<front;
 				//std::cerr << turnPhi(goalX, goalY, odomPos1.phi()) << std::endl;
 				//this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
 
-				if( left < 0.25 )
+				if( left < 0.3 )
 				{
-					if ( left < 0.2 ) this->pBrain->drive()->setVelocity( 0.0, -0.1, 0.0 );	// hindring er nærmere og ta en kontrollert unnaman
+					if ( left < 0.30 ) this->pBrain->drive()->setVelocity( 0.0, -0.1, 0.0 );// hindring er nærmere og ta en kontrollert unnaman
 					else
 					{
 						this->pBrain->drive()->setDestination(* destination);
@@ -1645,9 +1686,9 @@ class Control
 						this->pBrain->drive()->setVelocity(0.1, -0.1, 0.0);
 					}
 				}
-				if( right < 0.25 )
+				if( right < 0.3 )
 				{
-					if ( right < 0.2 ) this->pBrain->drive()->setVelocity( 0.0, 0.1, 0.0 );
+					if ( right < 0.30 ) this->pBrain->drive()->setVelocity( 0.0, 0.1, 0.0 );
 					else
 					{
 						this->pBrain->drive()->setDestination(* destination);
@@ -1655,7 +1696,7 @@ class Control
 						this->pBrain->drive()->setVelocity(0.1, 0.1, 0.0 );
 					}
 				}
-				if( left >= 0.25 && right >= 0.25 )
+				if( left >= 0.3 && right >= 0.3 )
 				{
 				//	this->pBrain->drive()->setVelocity(0.1, 0.0, 0.0);
 					//odomPos1 = tfloat goalX, float goalY his->pBrain->odom()->getPosition();
@@ -1671,32 +1712,32 @@ class Control
 					//return true;
 						
 				}
-*/
+
 					//this->pBrain->drive()->setDestination(* destination);
 					//this->pBrain->drive()->go();
 
-//				usleep(10000);
-//			}
+				usleep(10000);
+			}
 
-		//	else  this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.0 );
-		//i++;
+			//else  this->pBrain->drive()->setVelocity( 0.1 , 0.0 , 0.0 );
+		i++;
 
-		//usleep(1000);
-		//}while((i < 1));
+		usleep(1000);
+		}while((i < 1));
 
-		//if(i >= 1) i = 0;
+		if(i >= 1) i = 0;
 		
 		usleep(10000);
 
-	float Xverdi	= floor(odomPos1.x()*10+0.5)/10;
-	float Yverdi	= floor(odomPos1.y()*10+0.5)/10;
-	float MyXgoal	= floor(goalX*10+0.5)/10;
-	float MyYgoal	= floor(goalY*10+0.5)/10;
+	float Xverdi	= floor(odomPos1.x()*10+0.2)/10;
+	float Yverdi	= floor(odomPos1.y()*10+0.2)/10;
+	float MyXgoal	= floor(goalX*10+0.2)/10;
+	float MyYgoal	= floor(goalY*10+0.2)/10;
 
-	//std::cerr << "X bedt om: " << MyXgoal << " X pos: " << Xverdi << std::endl;
-	//std::cerr << "Y bedt om: " << MyYgoal << " Y pos: " << Yverdi << std::endl;
+	std::cerr << "X bedt om: " << MyXgoal << " X pos: " << Xverdi << std::endl;
+	std::cerr << "Y bedt om: " << MyYgoal << " Y pos: " << Yverdi << std::endl;
 
-
+	
 	if ( Xverdi == MyXgoal ) okx = true;
 	if ( Yverdi == MyYgoal ) oky = true;
 
@@ -1713,9 +1754,11 @@ class Control
 		
 	//this->pBrain->drive()->niceStop();
 
+	}
+
 	std::cerr << "Pos: " << this->pBrain->odom()->getPosition() << std::endl;
 	usleep( 20000 );
-	}	
+		
 	return true;
 	}
 
@@ -1783,7 +1826,7 @@ class Control
 		//return Coordinate(Y,X);
 	}
 
-	void calleft()
+	void callright()
 	{
 		const float *rangev;  // rangevector
 		unsigned int rangec;  // rangecount
@@ -1811,8 +1854,8 @@ class Control
 		Y = Y + 0.40;
 		
 		std::cerr << "Left - temp: " << temp << " angle: " << newAngle << " hyp: " << hyp << "\t(" << -X << ", " << Y << ")" << std::endl;
-		this->pBrain->drive()->setDestination(Coordinate(X,Y));
-		this->pBrain->drive()->go();
+		//this->pBrain->drive()->setDestination(Coordinate(X,Y));
+		//this->pBrain->drive()->go();
 
 		bool okx = false, oky = false, fortsett = true;
 
@@ -1849,7 +1892,7 @@ class Control
 		return;
 	}
 
-	void callright()
+	void calleft()
 	{
 		const float *rangev;  // rangevector
 		unsigned int rangec;  // rangecount
@@ -1884,7 +1927,7 @@ class Control
  		newAngle = (temp) * (180.0/512.0);
 		
 		X = hyp*cos((180.0 - 90.0 - newAngle) * 3.1415/180.0);
-		Y =-1*hyp*sin((180.0 - 90.0 - newAngle) * 3.1415/180.0);
+		Y = hyp*sin((180.0 - 90.0 - newAngle) * 3.1415/180.0);
 		Y = Y-0.40;
 		
 		std::cerr << "temp: " << temp << " angle: " << newAngle << " hyp: " << hyp << "\t(" << X << ", " << Y << ")" << std::endl;
@@ -1892,8 +1935,8 @@ class Control
 		std::cerr << Coordinate(X,Y) << std::endl;
 		std::cerr << "\n" << std::endl;
 
-		this->pBrain->drive()->setDestination(Coordinate(X,Y));
-		this->pBrain->drive()->go();
+		//this->pBrain->drive()->setDestination(Coordinate(X,Y));
+		//this->pBrain->drive()->go();
 
 		bool okx = false, oky = false, fortsett = true;
 

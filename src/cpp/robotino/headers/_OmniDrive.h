@@ -18,14 +18,14 @@ class AngularCoordinate;
 
 	// Speed
 /// The maximum top speed when setting speed manually
-#define OMNIDRIVE_MAX_SPEED	0.5
+#define OMNIDRIVE_MAX_SPEED	0.2
 
 	// Travel
 
 /// The maximum speed Robotino will travel at, in m/s.
 /// Travel means going only in x direction (straight forward) and turning to
 /// point at the destination.
-#define OMNIDRIVE_TRAVEL_MAX_SPEED	0.5
+#define OMNIDRIVE_TRAVEL_MAX_SPEED	0.2
 /// The minimum speed Robotino will travel at, in m/s.
 /// Above a quarter of this value, this value will be used for speed. Below a
 /// quarter, the speed will be set to 0.
